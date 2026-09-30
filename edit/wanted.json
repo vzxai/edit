@@ -1,0 +1,463 @@
+{
+  "about": "Clips for the edit. tools/fetch_wanted.py downloads each one into footage/news/<id>.mp4 (720p max, original audio). 'phrase' = words to find in the video's captions; the clip is cut from phrase-pre to phrase+post seconds. Clips without a phrase are b-roll: short videos are kept whole, long ones need 'start' (m:ss).",
+  "song": {
+    "id": "i-feel-weird",
+    "out": "music/i-feel-weird.mp3",
+    "title": "i feel weird",
+    "artist": "meat computer",
+    "released": "2026-09-02",
+    "duration_s": 136.6,
+    "searches": [
+      "scsearch5:meat computer i feel weird",
+      "ytsearch5:meat computer i feel weird",
+      "ytsearch5:\"i feel weird\" meat computer audio"
+    ]
+  },
+  "clips": [
+    {
+      "id": "bezos_paid",
+      "priority": "A",
+      "movement": "I",
+      "type": "dialogue",
+      "what": "Jeff Bezos at the post-flight press conference, West Texas, July 20 2021, thanking Amazon workers and customers.",
+      "words": "I also want to thank every Amazon employee and every Amazon customer, because you guys paid for all this.",
+      "phrase": "you guys paid for all this",
+      "pre": 7,
+      "post": 3,
+      "searches": [
+        "ytsearch8:Jeff Bezos \"paid for all this\" press conference",
+        "ytsearch8:Blue Origin Jeff Bezos post flight press conference July 20 2021"
+      ],
+      "credit": "Blue Origin post-flight press conference, July 20 2021"
+    },
+    {
+      "id": "zuck_friends",
+      "priority": "A",
+      "movement": "I",
+      "type": "dialogue",
+      "what": "Mark Zuckerberg on AI companions, Dwarkesh Patel podcast, April 2025.",
+      "words": "The average American, I think, has fewer than three friends.",
+      "phrase": "fewer than three friends",
+      "pre": 4,
+      "post": 7,
+      "searches": [
+        "ytsearch8:Zuckerberg \"fewer than three friends\"",
+        "ytsearch8:Mark Zuckerberg Dwarkesh Patel Llama 4 AI friends"
+      ],
+      "credit": "Dwarkesh Podcast, April 29 2025"
+    },
+    {
+      "id": "perry_kiss",
+      "priority": "A",
+      "movement": "I",
+      "type": "broll",
+      "what": "Katy Perry kneels and kisses the ground after landing from the all-female Blue Origin flight, April 14 2025.",
+      "searches": [
+        "ytsearch8:Katy Perry kisses the ground Blue Origin landing"
+      ],
+      "credit": "Blue Origin NS-31 landing, April 14 2025"
+    },
+    {
+      "id": "musk_chainsaw",
+      "priority": "A",
+      "movement": "I",
+      "type": "broll",
+      "what": "Elon Musk holds up a chainsaw on stage at CPAC, Feb 20 2025 ('this is the chainsaw for bureaucracy').",
+      "phrase": "chainsaw for bureaucracy",
+      "pre": 4,
+      "post": 4,
+      "searches": [
+        "ytsearch8:Elon Musk chainsaw CPAC Milei February 2025"
+      ],
+      "credit": "CPAC, Feb 20 2025"
+    },
+    {
+      "id": "robot_marathon",
+      "priority": "A",
+      "movement": "I",
+      "type": "broll",
+      "what": "Humanoid robots running (and falling) in the Beijing half marathon, April 19 2025.",
+      "searches": [
+        "ytsearch8:Beijing humanoid robot half marathon robots fall April 2025"
+      ],
+      "credit": "Beijing E-Town half marathon, April 19 2025"
+    },
+    {
+      "id": "friend_ads",
+      "priority": "A",
+      "movement": "I",
+      "type": "broll",
+      "what": "The Friend AI pendant subway ads in New York covered in graffiti ('AI wouldn't care if you lived or died', 'stop profiting off of loneliness'), fall 2025. Any clear shot of defaced ads.",
+      "searches": [
+        "ytsearch8:Friend AI subway ads vandalized New York",
+        "ytsearch8:friend.com subway ads graffiti AI wouldn't care if you lived or died"
+      ],
+      "credit": "New York City subway, fall 2025"
+    },
+    {
+      "id": "inauguration_ceos",
+      "priority": "A",
+      "movement": "II",
+      "type": "broll",
+      "what": "Tech CEOs lined up at the inauguration, Jan 20 2025 (Bezos, Zuckerberg, Musk, Pichai, Cook).",
+      "searches": [
+        "ytsearch8:tech billionaires inauguration Bezos Zuckerberg Musk Pichai rotunda January 20 2025"
+      ],
+      "credit": "Presidential inauguration, Jan 20 2025"
+    },
+    {
+      "id": "thiel_endure",
+      "priority": "A",
+      "movement": "II",
+      "type": "dialogue",
+      "what": "Ross Douthat asks Peter Thiel whether he'd prefer the human race to endure; Thiel hesitates (Interesting Times, NYT Opinion, June 26 2025). Keep the whole hesitation.",
+      "words": "Douthat: You would prefer the human race to endure, right? Thiel: Uh... Douthat: You're hesitating. ... This is a long hesitation.",
+      "phrase": "prefer the human race to endure",
+      "pre": 2,
+      "post": 16,
+      "searches": [
+        "ytsearch8:Peter Thiel Ross Douthat Interesting Times Antichrist",
+        "ytsearch8:Peter Thiel hesitates human race endure clip"
+      ],
+      "credit": "Interesting Times with Ross Douthat, NYT Opinion, June 26 2025"
+    },
+    {
+      "id": "karp_kill",
+      "priority": "A",
+      "movement": "II",
+      "type": "dialogue",
+      "what": "Palantir CEO Alex Karp on the Q4 2024 earnings call, Feb 3 2025.",
+      "words": "...and when it's necessary, to scare our enemies and, on occasion, kill them.",
+      "phrase": "on occasion kill them",
+      "pre": 7,
+      "post": 2,
+      "searches": [
+        "ytsearch8:Alex Karp \"on occasion kill them\"",
+        "ytsearch8:Palantir Karp scare our enemies kill them earnings call"
+      ],
+      "credit": "Palantir Q4 2024 earnings call, Feb 3 2025"
+    },
+    {
+      "id": "ice_masked",
+      "priority": "A",
+      "movement": "II",
+      "type": "broll",
+      "what": "Masked federal immigration agents detaining someone on a street, 2025-2026 (news footage, not graphic).",
+      "searches": [
+        "ytsearch8:masked ICE agents detain man street video news 2026",
+        "ytsearch8:masked federal agents immigration arrest Chicago Minneapolis footage"
+      ],
+      "credit": "news footage, 2025-2026"
+    },
+    {
+      "id": "la_fire",
+      "priority": "A",
+      "movement": "II",
+      "type": "broll",
+      "what": "Pacific Palisades fire, Jan 2025: houses burning, orange sky.",
+      "searches": [
+        "ytsearch8:Palisades fire homes burning footage January 2025"
+      ],
+      "credit": "Palisades fire, Jan 2025"
+    },
+    {
+      "id": "stargate_announce",
+      "priority": "A",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "The Stargate announcement at the White House, Jan 21 2025 (Trump with Altman, Ellison, Son): the $500 billion line.",
+      "phrase": "500 billion",
+      "pre": 4,
+      "post": 3,
+      "searches": [
+        "ytsearch8:Stargate announcement White House Altman Ellison Son January 21 2025"
+      ],
+      "credit": "The White House, Jan 21 2025"
+    },
+    {
+      "id": "hinton_nobel",
+      "priority": "A",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Geoffrey Hinton's Nobel banquet speech, Stockholm, Dec 10 2024.",
+      "words": "We urgently need research on how to prevent these new beings from wanting to take control.",
+      "phrase": "prevent these new beings from wanting to take control",
+      "pre": 4,
+      "post": 3,
+      "searches": [
+        "ytsearch8:Geoffrey Hinton Nobel Prize banquet speech 2024",
+        "ytsearch8:Hinton banquet speech new beings wanting to take control"
+      ],
+      "credit": "Nobel Prize banquet, Stockholm, Dec 10 2024"
+    },
+    {
+      "id": "trump_si",
+      "priority": "A",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Trump at the White House, Sept 29 2026, after the tech leaders' lunch and the order renaming AI.",
+      "words": "We've changed the name officially to SI. SI instead of AI... You know what that means? 'Super.' That's quite an announcement.",
+      "phrase": "instead of ai",
+      "pre": 4,
+      "post": 8,
+      "urls": [
+        "https://www.youtube.com/watch?v=nLfBj7BOqsY",
+        "https://www.youtube.com/watch?v=MVvVFtaoLZU"
+      ],
+      "searches": [
+        "ytsearch8:Trump tech executives AI September 29 2026 super intelligence remarks",
+        "ytsearch8:Trump Musk Zuckerberg Amodei reporters questions AI accords"
+      ],
+      "credit": "The White House, Sept 29 2026"
+    },
+    {
+      "id": "trump_selfpolice",
+      "priority": "A",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Same day, outside the West Wing, on the AI accord.",
+      "words": "I think I'm seeing tremendous self-policing. And they understand that they have to self-police.",
+      "phrase": "tremendous self policing",
+      "pre": 2,
+      "post": 5,
+      "urls": [
+        "https://www.youtube.com/watch?v=nLfBj7BOqsY",
+        "https://www.youtube.com/watch?v=MVvVFtaoLZU"
+      ],
+      "searches": [
+        "ytsearch8:Trump AI accord self-police September 29 2026",
+        "ytsearch8:PBS NewsHour Trump announces accord AI companies self-police"
+      ],
+      "credit": "The White House, Sept 29 2026"
+    },
+    {
+      "id": "huang_zero",
+      "priority": "A",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Nvidia CEO Jensen Huang to CBS News (Jo Ling Kent), Sept 2026.",
+      "words": "2030 is not going to be the end of the world. There is zero percent chance that's going to be the end of the world.",
+      "phrase": "going to be the end of the world",
+      "pre": 5,
+      "post": 4,
+      "searches": [
+        "ytsearch8:Jensen Huang CBS Jo Ling Kent zero percent chance end of the world",
+        "ytsearch8:Jensen Huang doomsday narratives interview September 2026"
+      ],
+      "credit": "CBS News, Sept 2026"
+    },
+    {
+      "id": "nepal_genz",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "Nepal's Gen Z protest at parliament, Kathmandu, Sept 8 2025, with the One Piece straw-hat flag. Crowds and flags, nothing graphic.",
+      "searches": [
+        "ytsearch8:Nepal Gen Z protest Kathmandu parliament One Piece flag September 2025"
+      ],
+      "credit": "Kathmandu, Sept 8 2025"
+    },
+    {
+      "id": "nepal_cleanup",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "Young Nepalis sweeping and cleaning the streets after the protests, Sept 2025.",
+      "searches": [
+        "ytsearch8:Nepal Gen Z clean up streets after protest brooms"
+      ],
+      "credit": "Kathmandu, Sept 2025"
+    },
+    {
+      "id": "onepiece_world",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "The One Piece flag at Gen Z protests elsewhere: Indonesia (Aug 2025), Madagascar, Peru, the Philippines, Morocco GenZ212.",
+      "searches": [
+        "ytsearch8:One Piece flag Gen Z protests Indonesia Madagascar Peru 2025"
+      ],
+      "credit": "Gen Z protests, 2025"
+    },
+    {
+      "id": "serbia_silence",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "Serbian students' 16 minutes of silence: a huge crowd standing still (Belgrade or Novi Sad, 2025). Aerials are best.",
+      "searches": [
+        "ytsearch8:Serbia 16 minutes of silence students protest crowd",
+        "ytsearch8:Novi Sad commemoration November 1 2025 aerial crowd"
+      ],
+      "credit": "Serbia, 2025"
+    },
+    {
+      "id": "srilanka_palace",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "Aragalaya, Colombo, July 9 2022: crowds pour into the presidential palace after the president flees; people swim in his pool. Crowds and the occupied palace, nothing violent.",
+      "searches": [
+        "ytsearch8:Sri Lanka protesters presidential palace pool July 9 2022",
+        "ytsearch8:Aragalaya Colombo crowd storms president's house"
+      ],
+      "credit": "Colombo, July 9 2022"
+    },
+    {
+      "id": "bangladesh_aug5",
+      "priority": "A",
+      "movement": "V",
+      "type": "broll",
+      "what": "Dhaka, Aug 5 2024: huge crowds celebrate in the streets as the student uprising forces Sheikh Hasina out.",
+      "searches": [
+        "ytsearch8:Dhaka August 5 2024 crowds celebrate Hasina resigns students",
+        "ytsearch8:Bangladesh student uprising victory crowds Shahbag August 2024"
+      ],
+      "credit": "Dhaka, Aug 5 2024"
+    },
+    {
+      "id": "trump_unga",
+      "priority": "B",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Trump at the UN General Assembly, Sept 22 2026, announcing the rename.",
+      "words": "...the much more accurate term 'super' as opposed to 'artificial.' So it's super intelligence.",
+      "phrase": "super as opposed to artificial",
+      "pre": 6,
+      "post": 4,
+      "searches": [
+        "ytsearch8:Trump UN General Assembly speech September 22 2026 super intelligence"
+      ],
+      "credit": "UN General Assembly, Sept 22 2026"
+    },
+    {
+      "id": "amodei_risks",
+      "priority": "B",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Dario Amodei at the White House, Sept 29 2026.",
+      "words": "The technology has very real risks.",
+      "phrase": "very real risks",
+      "pre": 3,
+      "post": 3,
+      "searches": [
+        "ytsearch8:Dario Amodei Mark Zuckerberg Sundar Pichai talk AI with Donald Trump USA TODAY",
+        "ytsearch8:Amodei White House very real risks September 2026"
+      ],
+      "credit": "The White House, Sept 29 2026"
+    },
+    {
+      "id": "vance_frankenstein",
+      "priority": "B",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "JD Vance on the All-In podcast, Sept 2026.",
+      "words": "If you're building Frankenstein, stop.",
+      "phrase": "building frankenstein",
+      "pre": 8,
+      "post": 3,
+      "searches": [
+        "ytsearch8:JD Vance All-In podcast Frankenstein AI September 2026"
+      ],
+      "credit": "All-In podcast, Sept 2026"
+    },
+    {
+      "id": "trump_hoax_call",
+      "priority": "B",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Trump phoning in to Jensen Huang on stage at the All-In Summit, Sept 14 2026, calling AI fears a hoax.",
+      "phrase": "hoax",
+      "pre": 5,
+      "post": 4,
+      "searches": [
+        "ytsearch8:Trump calls Jensen Huang on stage All-In Summit hoax September 2026"
+      ],
+      "credit": "All-In Summit, Sept 14 2026"
+    },
+    {
+      "id": "doomsday_clock",
+      "priority": "B",
+      "movement": "II",
+      "type": "broll",
+      "what": "The Doomsday Clock unveiled at 85 seconds to midnight, Jan 27 2026.",
+      "phrase": "85 seconds",
+      "pre": 3,
+      "post": 4,
+      "searches": [
+        "ytsearch8:Doomsday Clock 2026 85 seconds to midnight announcement"
+      ],
+      "credit": "Bulletin of the Atomic Scientists, Jan 27 2026"
+    },
+    {
+      "id": "musk_demon",
+      "priority": "B",
+      "movement": "III",
+      "type": "dialogue",
+      "what": "Elon Musk at MIT, Oct 2014.",
+      "words": "With artificial intelligence, we are summoning the demon.",
+      "phrase": "summoning the demon",
+      "pre": 4,
+      "post": 3,
+      "searches": [
+        "ytsearch8:Elon Musk MIT 2014 summoning the demon"
+      ],
+      "credit": "MIT AeroAstro Centennial, Oct 2014"
+    },
+    {
+      "id": "guard_la",
+      "priority": "B",
+      "movement": "II",
+      "type": "broll",
+      "what": "National Guard troops deployed in Los Angeles, June 2025.",
+      "searches": [
+        "ytsearch8:National Guard Los Angeles June 2025 troops street footage"
+      ],
+      "credit": "Los Angeles, June 2025"
+    },
+    {
+      "id": "ban_asi",
+      "priority": "B",
+      "movement": "V",
+      "type": "broll",
+      "what": "Sanders and Casar introduce the Ban Artificial Superintelligence Act, Sept 23 2026.",
+      "searches": [
+        "ytsearch8:Sanders Casar Ban Artificial Superintelligence Act press conference"
+      ],
+      "credit": "U.S. Capitol, Sept 23 2026"
+    },
+    {
+      "id": "india_genz",
+      "priority": "B",
+      "movement": "V",
+      "type": "broll",
+      "what": "India's Gen Z protests over the exam paper leaks, 2026.",
+      "searches": [
+        "ytsearch8:India Gen Z protest 2026 exam students march"
+      ],
+      "credit": "India, 2026"
+    },
+    {
+      "id": "italy_general_strike",
+      "priority": "B",
+      "movement": "V",
+      "type": "broll",
+      "what": "Italy's general strike for Gaza, Oct 3 2025: ports and city centres full of marching workers.",
+      "searches": [
+        "ytsearch8:Italy general strike October 3 2025 Gaza flotilla crowds"
+      ],
+      "credit": "Italy, Oct 3 2025"
+    },
+    {
+      "id": "kenya_genz",
+      "priority": "B",
+      "movement": "V",
+      "type": "broll",
+      "what": "Kenya's Gen Z protests against the Finance Bill, June 2024: crowds marching in Nairobi (crowds only).",
+      "searches": [
+        "ytsearch8:Kenya Gen Z protest Nairobi finance bill June 2024 crowds"
+      ],
+      "credit": "Nairobi, June 2024"
+    }
+  ]
+}

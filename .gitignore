@@ -1,0 +1,6 @@
+out/
+music/*.wav
+__pycache__/
+*.pyc
+*.raw.f32
+footage/_proxy/
