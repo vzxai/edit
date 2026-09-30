@@ -1,9 +1,9 @@
 """Soundtrack for the edit.
 
-With --song: the song carries everything; the footage's own sound (chants, the launch, the ice)
-comes through underneath at a lower level.
-Without it: a temporary score (drone + the footage's own sound + pings when the dot appears),
-so the picture can be watched and judged before the song is in.
+With --song: the song carries everything. When someone speaks the music steps back; the footage's own
+sound (chants, the launch, the ice) comes through underneath. The only sound of ours is one signal from
+the dot, in the silence at the end.
+Without it: a temporary score (drone + the footage's own sound + pings when the dot appears).
 
 usage: python3 edit/audio.py OUT.wav [--song SONG.mp3] [--song-start SEC]
 """
@@ -20,13 +20,31 @@ import timeline as TL
 
 SR = 48000
 
-def load(path, t_in=0.0, dur=None):
+def load(path, t_in=0.0, dur=None, af=None):
     cmd = ["ffmpeg", "-v", "error", "-ss", f"{t_in:.3f}", "-i", path]
     if dur:
         cmd += ["-t", f"{dur:.3f}"]
+    if af:
+        cmd += ["-af", af]
     cmd += ["-ac", "2", "-ar", str(SR), "-f", "f32le", "-"]
     raw = subprocess.run(cmd, capture_output=True).stdout
     return np.frombuffer(raw, np.float32).reshape(-1, 2).copy()
+
+# a voice from the news: cleaned up and evened out, so every speaker sits at the same level over the music
+VOICE_AF = "highpass=f=90,lowpass=f=9500,acompressor=threshold=0.06:ratio=4:attack=5:release=120:makeup=2"
+VOICE_RMS = -18.0          # dBFS, averaged over the parts where someone is talking
+
+def voice_level(x):
+    """scale speech so its active RMS is VOICE_RMS, then round off the peaks"""
+    fr = int(0.05 * SR)
+    k = len(x) // fr
+    if k == 0:
+        return x
+    e = np.sqrt((x[:k * fr] ** 2).reshape(k, fr, -1).mean(axis=(1, 2)) + 1e-12)
+    act = e > e.max() * 10 ** (-25 / 20)
+    rms = np.sqrt(np.mean(e[act] ** 2))
+    y = x * (10 ** (VOICE_RMS / 20) / rms)
+    return (np.tanh(y / 0.89) * 0.89).astype(np.float32)
 
 def fade(x, a=0.03, b=0.08):
     n = len(x)
@@ -81,8 +99,11 @@ def ping(dur=2.4, f=1318.5):
         k = int(d * SR); out[k:k + len(x)] += x * g
     return np.stack([out, np.roll(out, 240)], 1)
 
+def b_(n):
+    return TL.b(n)
+
 def score(total):
-    """the temporary score: a low drone that shifts by movement"""
+    """the temporary score: a low drone that shifts by section"""
     n = int(total * SR)
     t = np.arange(n, dtype=np.float32) / SR
     rng = np.random.default_rng(3)
@@ -92,8 +113,8 @@ def score(total):
         b = np.sin(2 * np.pi * (freq + det) * t)
         v = (a + b) * 0.5 * amp_env
         L[:] += v * (1 - pan) ; R[:] += v * (1 + pan)
-    # shot boundaries of the movements (seconds)
-    I, II, III, IV, V = 9.0, 40.0, 71.5, 99.5, 111.5
+    # where the edit's sections start (seconds)
+    I, II, III, IV, V = TL.VERSE, TL.DROP, TL.BREAK, TL.BUILD + b_(29), TL.FINAL
     base = envelope(n, [(0, 0), (3, 0.10), (I, 0.16), (II, 0.20), (III, 0.18), (IV, 0.08), (V, 0.14), (total - 5, 0.18), (total, 0)])
     voice(55.0, base, 0.11, -0.1)
     voice(82.41, base * 0.6, 0.13, 0.1)
@@ -121,26 +142,29 @@ def score(total):
     mix = np.stack([L, R], 1) + air
     return mix
 
-def dot_times():
-    """when the blue dot arrives on screen (each gets a soft ping)"""
+def dot_times(song=False):
+    """when the blue dot arrives on screen (each gets a soft ping). With the song, only the last one:
+    the signal that goes out in the silence after the music stops."""
     from render import wh_dot_time
     out = []
     for t, s in shot_times():
         k = s["kind"]
-        if k == "opening":
-            out.append(t + 0.25)
+        if k == "finale":
+            out.append(t + s.get("land", 2.3))
+        elif song:
+            continue
+        elif k == "opening":
+            out += [t + p + 0.02 for p in s["pulses"]]
         elif k == "clip":
             out += [t + e[3] + 0.05 for e in s["fx"] if e[0] == "marker"]
         elif k == "sat_zoom":
             out.append(t + 0.45)
         elif k == "whitehouse":
             out.append(t + wh_dot_time(s["dur"]) + 0.05)
-        elif k == "finale":
-            out.append(t + 1.4)
     return out
 
 def native(s):
-    """the sound a shot brings with it: (path, t_in, gain, is_speech) or None"""
+    """the sound a shot brings with it: dict(path, t_in, gain, speech, duck, a_out) or None"""
     if s["kind"] == "news":
         path = src.news(s["id"])
         if os.path.exists(path):
@@ -148,10 +172,11 @@ def native(s):
             t_in = s["t_in"]
             if t_in is None:
                 t_in = max(0.0, meta["phrase_at"] - 0.5) if meta.get("phrase_at") is not None else 0.0
-            return path, t_in, s["audio"], bool(s.get("quote"))
+            return dict(path=path, t_in=t_in, gain=s["audio"], speech=s.get("speech", bool(s.get("quote"))),
+                        duck=s.get("duck", 0.18), a_out=s.get("a_out"))
         s = s.get("fallback") or {}
     if s.get("kind") == "clip" and s.get("audio", 0) > 0:
-        return src.yfcc(s["pid"]), s["t_in"], s["audio"], False
+        return dict(path=src.yfcc(s["pid"]), t_in=s["t_in"], gain=s["audio"], speech=False, duck=1.0, a_out=None)
     return None
 
 def build(out, song=None, song_start=0.0):
@@ -160,32 +185,35 @@ def build(out, song=None, song_start=0.0):
     bed = np.zeros((n, 2), np.float32)
     if song:
         s = load(song, song_start, total)
-        place(bed, fade(s, 0.01, 1.5), 0.0, 1.0)
+        place(bed, fade(s, 0.01, 0.3), 0.0, 1.0)
         native_gain = 0.35
     else:
         bed += score(total)
         native_gain = 1.0
     mix = np.zeros((n, 2), np.float32)
-    duck = [(0.0, 1.0)]
+    duck = np.ones(n, np.float32)
     for t, s in shot_times():
-        src_ = native(s)
-        if not src_:
+        a = native(s)
+        if not a:
             continue
-        path, t_in, gain, speech = src_
-        x = load(path, t_in, s["dur"] + 0.25)
+        length = s["dur"] + 0.25
+        if a["a_out"] is not None:
+            length = min(length, a["a_out"] - a["t_in"])
+        x = load(a["path"], a["t_in"], length, af=VOICE_AF if a["speech"] else None)
         if not len(x):
             continue
         pk = np.max(np.abs(x)) + 1e-6
-        if speech:
-            # someone speaks: their voice leads, the music steps back
-            place(mix, fade(x / pk * 0.8, 0.02, 0.2), t, gain)
-            duck += [(t - 0.15, 1.0), (t + 0.1, 0.32), (t + s["dur"] - 0.1, 0.32), (t + s["dur"] + 0.25, 1.0)]
+        if a["speech"]:
+            # someone speaks: their voice leads, the music steps back (and comes back after)
+            place(mix, fade(voice_level(x), 0.02, 0.08 if a["a_out"] else 0.2), t, a["gain"])
+            end = t + len(x) / SR
+            env = envelope(n, [(0, 1.0), (t - 0.15, 1.0), (t + 0.1, a["duck"]), (end - 0.05, a["duck"]),
+                               (end + 0.3, 1.0), (total + 1, 1.0)])
+            duck = np.minimum(duck, env)
         else:
-            place(mix, fade(x / pk * 0.5, 0.04, 0.25), t, gain * native_gain)
-    duck.append((total, 1.0))
-    duck.sort()
-    mix += bed * envelope(n, duck)[:, None]
-    for tp in dot_times():
+            place(mix, fade(x / pk * 0.5, 0.04, 0.25), t, a["gain"] * native_gain)
+    mix += bed * duck[:, None]
+    for tp in dot_times(song=bool(song)):
         place(mix, ping(), tp, 0.22 if song else 0.35)
     mix = np.tanh(mix * 1.1) * 0.9
     tmp = out + ".raw.f32"
@@ -200,8 +228,5 @@ if __name__ == "__main__":
     ap.add_argument("out")
     ap.add_argument("--song")
     ap.add_argument("--song-start", type=float, default=0.0)
-    ap.add_argument("--beats", help="beats.json from beats.py: snap cuts to the song")
     a = ap.parse_args()
-    if a.beats:
-        TL.apply_beats(a.beats)
     build(a.out, a.song, a.song_start)

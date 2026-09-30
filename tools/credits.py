@@ -43,7 +43,9 @@ def main():
               "Ground: contains modified Copernicus Sentinel data 2026 (Washington DC 2026-09-16; Abilene TX 2026-09-15).",
               "Symbol: the One World Flag by Thomas Mandl (2016), public domain.",
               "Music: \"i feel weird\" by meat computer (2026).",
-              "", "This edit: CC BY-NC-SA 4.0. Some footage is ShareAlike or NonCommercial, so the whole piece is too."]
+              "", "The news footage belongs to its owners and is quoted here for commentary and criticism.",
+              "Everything else of ours (the words, the dot, the design) is CC BY-NC-SA 4.0: some of the Creative Commons "
+              "footage is ShareAlike or NonCommercial, so the piece is too."]
     open(os.path.join(ROOT, "CREDITS.md"), "w").write("\n".join(lines) + "\n")
     print(f"{len(seen)} CC clips, {len(news)} news clips credited")
 

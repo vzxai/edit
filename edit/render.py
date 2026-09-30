@@ -1,6 +1,6 @@
 """Render the edit: timeline.py -> 1080x1920, 30 fps, H.264 + AAC.
 
-usage: python3 edit/render.py OUT.mp4 [--from SEC] [--to SEC] [--song SONG.mp3] [--preview]
+usage: python3 edit/render.py OUT.mp4 [--from SEC] [--to SEC] [--preview] [--fast]
 """
 import argparse
 import math
@@ -207,6 +207,23 @@ def draw_words(f, lines, t, y, typed_cps=None, size=40, gap=1.25):
             return y + lay.shape[0]
     return y
 
+def blur_regions(img, regions, t):
+    """soften parts of a source frame (a repost's watermark) between file times t0 and t1"""
+    h, w = img.shape[:2]
+    for (x0, y0, x1, y1, t0, t1) in regions:
+        if not t0 <= t < t1:
+            continue
+        pad = 10
+        X0, Y0 = max(0, int(x0 * w) - pad), max(0, int(y0 * h) - pad)
+        X1, Y1 = min(w, int(x1 * w) + pad), min(h, int(y1 * h) + pad)
+        roi = img[Y0:Y1, X0:X1].astype(np.float32)
+        soft = cv2.GaussianBlur(roi, (0, 0), max(6.0, (Y1 - Y0) / 5))
+        m = np.zeros(roi.shape[:2], np.float32)
+        m[int(y0 * h) - Y0:int(y1 * h) - Y0, int(x0 * w) - X0:int(x1 * w) - X0] = 1.0
+        m = cv2.GaussianBlur(m, (0, 0), pad / 2)[..., None]      # soft inside, but full strength up to the frame edge
+        img[Y0:Y1, X0:X1] = (roi * (1 - m) + soft * m).astype(np.uint8)
+    return img
+
 def shot_news(s, n):
     path = src.news(s["id"])
     lines = quote_lines(s.get("quote"))
@@ -219,11 +236,19 @@ def shot_news(s, n):
         z0, z1 = s["zoom"]
         for i, img in enumerate(src.video_frames(path, t_in, n)):
             t = i / FPS
-            f, box = place_window(fx.grade(img, s["grade"]), s["width"], s["cy"], z0 + (z1 - z0) * fx.ease(i / max(1, n - 1)))
+            if s.get("cover"):
+                img = blur_regions(img.copy(), s["cover"], t_in + t)
+            f, box = place_window(fx.grade(img, s["grade"]), s["width"], s["cy"], z0 + (z1 - z0) * fx.ease(i / max(1, n - 1)),
+                                  s.get("focus", (0.5, 0.5)))
+            yb = box[1] + box[3] + 60
             if lines:
-                yb = draw_words(f, lines, t, box[1] + box[3] + 60, size=38)
-                if who:
-                    caption(f, who, max(yb, box[1] + box[3] + 150) + 30, 23, fx.ease((t - 0.3) / 0.4), color=(205, 210, 220))
+                yb = draw_words(f, lines, t, yb, size=38)
+            if who and s.get("who_y"):
+                # full-frame footage: the credit sits on a soft dark band at the bottom
+                f = shade(f, s["who_y"] - 22, s["who_y"] + 22, 0.55 * fx.ease((t - 0.2) / 0.4), feather=60)
+                caption(f, who, s["who_y"], 23, fx.ease((t - 0.3) / 0.4), color=(205, 210, 220))
+            elif who and lines:
+                caption(f, who, max(yb, box[1] + box[3] + 150) + 30, 23, fx.ease((t - 0.3) / 0.4), color=(205, 210, 220))
             yield f
         return
     fb = s.get("fallback")
@@ -262,21 +287,31 @@ def shot_quote(s, n):
         yield f
 
 def shot_opening(s, n):
+    """a dot in the dark answers the song's first downbeats, then becomes the planet"""
     files = src.goes_day()
-    # dawn over the Americas: frames 09:00 -> 13:40 UTC
-    i0 = next(k for k, p in enumerate(files) if p.endswith("_0900.png") or p.endswith("_0920.png"))
+    # the whole lit face of the planet, over the Americas: from 15:00 UTC
+    i0 = next(k for k, p in enumerate(files) if p.endswith("_1500.png"))
+    pulses = s["pulses"]
+    g0, g1 = s["grow"]
+    rate = 7 / (g1 - g0)                                   # GOES frames (20 min apart) per second
     for i in range(n):
         t = i / FPS
         f = canvas()
-        if t < 4.2:
-            r = 7 + 5 * fx.ease(t / 4.2)
-            a = fx.ease(t / 0.8)
+        if t < g0:
+            a = fx.ease((t - pulses[0]) / 0.25)
+            age = min([t - p for p in pulses if p <= t], default=9.0)
+            r = 11 + 4 * math.exp(-age * 5)                    # a small kick on every downbeat
             fx.dot(f, W / 2, H / 2, r, a, glow=1.0)
-            fx.ping(f, W / 2, H / 2, r, t, period=1.4, alpha=a * (1 - fx.ease((t - 3.4) / 0.8)))
+            for p in pulses:
+                ph = (t - p) / 1.5
+                if 0 <= ph < 1:
+                    fx._blend_ring(f, W / 2, H / 2, r * (1 + 5 * fx.ease(ph ** 0.7)), fx.SIGNAL,
+                                   a * 0.75 * (1 - ph) ** 1.6, width=2)
         else:
-            u = (t - 4.2) / (s["dur"] - 4.2)
-            d = 24 + (1000 - 24) * fx.ease_io(u, 2.6)          # the dot becomes the planet
-            e = fx.grade(src.goes_at(i0 + u * 14, files, int(d * 1.02)), "earth")
+            u = min(1.0, (t - g0) / (g1 - g0))
+            d = 24 + (1000 - 24) * fx.ease_io(u, 2.6)        # the dot becomes the planet
+            d *= 1 + 0.03 * max(0.0, t - g1) / 2.0            # then drifts closer
+            e = fx.grade(src.goes_at(i0 + (t - g0) * rate, files, int(d * 1.02)), "earth")
             eh = e.shape[0]
             y0, x0 = int(H / 2 - eh / 2), int(W / 2 - eh / 2)
             ys, xs = max(0, y0), max(0, x0)
@@ -286,28 +321,33 @@ def shot_opening(s, n):
             a = 1 - fx.ease(u / 0.35)
             if a > 0:
                 fx.dot(f, W / 2, H / 2, d / 2, a, glow=0.6)
+            caption(f, "earth, sept 29 2026 · noaa goes-19", 1840, 18, 0.55 * fx.ease((t - g1) / 0.5))
         yield f
 
 def shot_earth_day(s, n):
+    """the whole planet turning: span is the part of Sept 29 2026 it passes through (0-1), push how much it grows"""
     files = src.goes_day()
+    a, b_ = s.get("span", (0.0, 1.0))
+    push = s.get("push", 60)
     for i in range(n):
         u = i / max(1, n - 1)
         f = canvas()
-        d = int(1040 + 60 * u)
-        e = src.goes_at(u * (len(files) - 1), files, d)
+        d = int(1040 + push * u)
+        e = src.goes_at((a + (b_ - a) * u) * (len(files) - 1), files, d)
         y0, x0 = int(H / 2 - d / 2 - 80), int(W / 2 - d / 2)
         xs, xe = max(0, x0), min(W, x0 + d)
         f[y0:y0 + d, xs:xe] = e[:, xs - x0:xe - x0]
         yield fx.grade(f, "earth")
 
 def shot_finale(s, n):
+    """the planet shrinks back into the symbol; when the music stops, the words land"""
     files = src.goes_day()
-    idx = next(k for k, p in enumerate(files) if p.endswith("_1120.png"))
+    idx = next(k for k, p in enumerate(files) if p.endswith("_1700.png"))
     earth = fx.grade(src.goes_frame(files[idx]), "earth")
+    land = s.get("land", 2.3)
     for i in range(n):
         t = i / FPS
         f = canvas()
-        # the planet shrinks back into the symbol
         u = fx.ease_io(min(1.0, t / 2.0), 2.4)
         d = 1000 + (140 - 1000) * u
         e = cv2.resize(earth, (int(d), int(d)), interpolation=cv2.INTER_AREA)
@@ -329,11 +369,14 @@ def shot_finale(s, n):
                 cv2.rectangle(ov, (int(W / 2 - fw / 2), int(cy - fh / 2)), (int(W / 2 + fw / 2), int(cy + fh / 2)),
                               (190, 196, 210), 2, lineType=cv2.LINE_AA)
                 f = (f.astype(np.float32) * (1 - fa) + ov.astype(np.float32) * fa).astype(np.uint8)
-        na = fx.ease((t - 0.15) / 0.4) * (1 - fx.ease((t - 1.75) / 0.4))
-        fx.paste(f, fx.text_layer("one nation. earth.", "serif", 72, fx.PAPER, 960), W / 2, 1450, na)
-        la = fx.ease((t - 2.3) / 0.6)
-        fx.paste(f, fx.text_layer("seize the future.", "serif", 84, fx.PAPER, 960), W / 2, 1300, la)
-        fx.paste(f, fx.text_layer("for all.", "serif-i", 84, fx.PAPER, 960), W / 2, 1400, fx.ease((t - 3.0) / 0.6))
+            # in the silence, one signal goes out
+            ph = (t - land) / 1.8
+            if 0 <= ph < 1:
+                fx._blend_ring(f, W / 2, cy, 70 * (1 + 3.5 * fx.ease(ph ** 0.6)), fx.SIGNAL, 0.8 * (1 - ph) ** 1.5, width=2.5)
+        na = fx.ease((t - 0.3) / 0.4) * (1 - fx.ease((t - (land - 0.5)) / 0.35))
+        fx.paste(f, fx.text_layer("one nation. earth.", "serif", 72, fx.PAPER, 960), W / 2, 1540, na)
+        fx.paste(f, fx.text_layer("seize the future.", "serif", 84, fx.PAPER, 960), W / 2, 1300, fx.ease((t - land) / 0.12))
+        fx.paste(f, fx.text_layer("for all.", "serif-i", 84, fx.PAPER, 960), W / 2, 1400, fx.ease((t - land - 0.6) / 0.35))
         yield f
 
 RENDERERS = {"clip": shot_clip, "news": shot_news, "sat_zoom": shot_sat_zoom, "whitehouse": shot_whitehouse,
@@ -374,9 +417,18 @@ def overlay_text(f, t):
     for (t0, t1, text, style, size, y, mode) in TL.TEXT:
         if t0 <= t < t1:
             a = fx.ease((t - t0) / 0.35) * (1 - fx.ease((t - (t1 - 0.35)) / 0.35))
-            s = typed(text, t - t0, 26) if mode == "type" else text
             color = fx.ASH if style == "mono" else fx.PAPER
-            fx.paste(f, fx.text_layer(s, style, size, color, 900), W / 2, y, a, dy=(1 - fx.ease((t - t0) / 0.5)) * 8)
+            dy = (1 - fx.ease((t - t0) / 0.5)) * 8
+            if mode == "type":
+                # typed in place, left to right, inside the finished block (so nothing shifts as it types)
+                part = typed(text, t - t0, 26)
+                if part.strip():
+                    full = fx.text_layer(text, style, size, color, 900, align="left")
+                    lay = fx.text_layer(part, style, size, color, 900, align="left")
+                    x0, y0 = W / 2 - full.shape[1] / 2, y - full.shape[0] / 2
+                    fx.paste(f, lay, x0 + lay.shape[1] / 2, y0 + lay.shape[0] / 2, a, dy=dy)
+            else:
+                fx.paste(f, fx.text_layer(text, style, size, color, 900), W / 2, y, a, dy=dy)
     return f
 
 def encode(out, t_from, t_to, preview=False, fast=False):
@@ -402,9 +454,6 @@ if __name__ == "__main__":
     ap.add_argument("--to", dest="t_to", type=float, default=None)
     ap.add_argument("--preview", action="store_true")
     ap.add_argument("--fast", action="store_true", help="quicker, larger-grained encode for drafts")
-    ap.add_argument("--beats", help="beats.json from beats.py: snap cuts to the song")
     a = ap.parse_args()
-    if a.beats:
-        TL.apply_beats(a.beats)
     n = encode(a.out, a.t_from, a.t_to, a.preview, a.fast)
     print("frames", n)

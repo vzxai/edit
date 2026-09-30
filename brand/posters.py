@@ -25,6 +25,16 @@ def shot_frame(pred, t_rel):
             return f
     return f
 
+def quote_frame(t_rel):
+    """Coxon's resignation, from inside (a card of its own: it isn't in the video)"""
+    s = dict(kind="quote", dur=4.0, bg=5486920308)
+    n = int(round(s["dur"] * fx.FPS))
+    k = min(n - 1, int(t_rel * fx.FPS))
+    for i, f in enumerate(R.shot_quote(s, n)):
+        if i == k:
+            return f
+    return f
+
 def words(f, lines):
     for (text, style, size, y, color) in lines:
         fx.paste(f, fx.text_layer(text, style, size, color, 900), W / 2, y, 1.0)
@@ -58,8 +68,8 @@ def carousel():
         words(shot_frame(clip(3772095704), 1.0), [
             ("85 seconds to midnight.", "mono-r", 50, 1400, P),
             ("doomsday clock · jan 27 2026\nthe closest it has ever been", "mono", 26, 1500, A)]),
-        shot_frame(nid("trump_si"), 4.4),
-        shot_frame(kind("quote"), 3.9),
+        shot_frame(nid("trump_si"), 4.2),
+        quote_frame(3.9),
         words(shot_frame(kind("earth_day"), 1.5), [
             ("there is no leaving.\nthere is only here,\nand each other.", "serif", 62, 1560, P)]),
         words(shot_frame(nid("bangladesh_aug5"), 0.8), [
